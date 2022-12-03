@@ -55,4 +55,8 @@ if __name__ == "__main__":
     tknz_cls.cnctnt()
     print(f'Tokenizing, removing white space and rejoining tokens:\n{tknz_cls.txt}')
     
-    
+    tknz_cls.rmv_stpwrds(['fear', 'mind'])
+    tknz_cls.tknz()
+    tknz_cls.rmv_whtsp()
+    tknz_cls.cnctnt()
+    print(f'Removing \'mind\' and \'fear\' from text:\n{tknz_cls.txt}')

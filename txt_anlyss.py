@@ -23,6 +23,8 @@ class Tokenize():
             self.txt = ' '.join(self.txt)
         else:
             self.txt = delim.join(self.txt)
+            
+        return None
     
     def lwr(self):
         '''fnc to lowercase text'''
@@ -54,7 +56,24 @@ class Tokenize():
             self.txt =  tmp_txt
             
         return None
+    
+
+    def rmv_stpwrds(self, stpwrds):
+        '''function to remove  a list of stop words'''
+        
+        if isinstance(self.txt, str):
+            for stpwrd in stpwrds:
+                self.txt = self.txt.replace(stpwrd, '')
+        
+        elif isinstance(self.txt, list):
+            #might want to add option for == vs in 
+            for stpwrd in stpwrds:
+                for tkn in self.txt:
+                    if tkn == stpwrd:
+                        self.txt.remove(tkn)
             
+        return None
+        
     def rmv_whtsp(self):
         '''function to remove trailing/leading whitespace'''
         
