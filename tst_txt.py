@@ -7,9 +7,12 @@ Script tests text anlysis class functions.
 
 @author: carl
 """
+import time
 from txt_anlyss import Tokenize
 
+
 if __name__ == "__main__":
+    t0 = time.time()
     
     tst_str_cln = '''I must not fear. Fear is the mind-killer. 
     Fear is the little-death that brings total obliteration. 
@@ -60,3 +63,5 @@ if __name__ == "__main__":
     tknz_cls.rmv_whtsp()
     tknz_cls.cnctnt()
     print(f'Removing \'mind\' and \'fear\' from text:\n{tknz_cls.txt}')
+    
+    print(f'Script took {time.time()-t0}s to run.')
