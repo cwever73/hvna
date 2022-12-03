@@ -10,11 +10,35 @@ Script gets text from desired urls.
 
 from bs4 import BeautifulSoup as btflSp
 from datetime import datetime as dt
+from nltk.corpus import stopwords
 import requests
+import sys
 import time
+from txt_anlyss import Tokenize
 
 
-def gt_urls():
+def gt_ggl_urls(srch_trm):
+    '''func to grab urls from a particular google search'''
+    
+    srch_trm = srch_trm.replace(' ', '+')
+    url = f'https://www.google.com/search?q={srch_trm}'
+    print(f'URL: {url}')
+    reqs = requests.get(url)
+    soup = btflSp(reqs.text, 'html.parser')
+    
+    ggl_url_lst = []
+    for indx, link in enumerate(soup.find_all('a')):
+        print(indx, link.get('href'))
+        if '/url?q=' in link.get('href'):
+            nw_url = link.get('href').split('/url?q=')[1]
+            ggl_url_lst.append(nw_url)
+    
+    print(ggl_url_lst)
+    
+    return ggl_url_lst
+
+    
+def gt_nws_urls():
     '''func to grab urls to search from news sites'''
     
     #for npr specifically
@@ -91,13 +115,61 @@ def gt_urls():
     return list(set(npr_url_lst+nyt_url_lst+cnn_url_lst+skmfd_url_lst))
 
 
-def gt_txt():
-    '''func to get text from each url of interest'''
+def gt_txt(url_lst):
+    '''Given a list of urls, return a list of dictionaries
+     containin url and respective text from each'''
+    
+    url_txt = []
+    
+    for url in url_lst:
+        reqs = requests.get(url)
+        soup = btflSp(reqs.text, 'html.parser')
+        
+        if 'Error 404' in soup.text:
+            print(f'Invalid url: {url}')
+        else:
+            url_txt.append({'url': url, 'text': soup.text})
+        
+    
+    return url_txt
     
 if __name__ == "__main__":
     t0 = time.time()
     
-    total_url_lst = gt_urls()
+    actn = sys.argv[1]
+    
+    # total_nws_url_lst = gt_nws_urls()
+    
+    
+    if actn == 'ggl_srch':
+        #google search (first page)
+        #TODO: add param for # pages of google results to look thru
+        srch_on = input('What do you wanna google?  ')
+        tot_ggl_urls = gt_ggl_urls(srch_on)
+        
+        txt_lst_dct = gt_txt(tot_ggl_urls)
+        
+        print(f'Number of URLs Scraped: {len(txt_lst_dct)}')
+        # print(txt_lst_dct)
+        print(txt_lst_dct[3:7])
+        
+        tknz_cls = Tokenize('')
+        stpwrds = tknz_cls.gt_stpwrds()
+        
+        for data_dct in txt_lst_dct[:10]:
+            print(data_dct)
+            tknz_cls = Tokenize(data_dct['text'])
+            #first sweep, remove \n in text
+            tknz_cls.rmv_pnc(pnc_lst=['\n'], rplc=' ')
+            print(tknz_cls.txt)
+            #second sweep, look for all punctuation
+            tknz_cls.rmv_pnc()
+            print(tknz_cls.txt)
+            #now remove typical English stopwords
+            tknz_cls.rmv_stpwrds(stpwrds)
+            print(tknz_cls.txt)
+            
+            
     
     print(f'Script took {time.time()-t0}s to run.')
     

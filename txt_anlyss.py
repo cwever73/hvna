@@ -26,6 +26,20 @@ class Tokenize():
             
         return None
     
+    
+    def gt_stpwrds(self):
+        '''func to read in stopwords from text file in repo
+           taken from https://countwordsfree.com/stopwords'''
+        
+        stp_wrds = []
+        with open('stop_words_english.txt') as g:
+            stp_wrds = g.readlines()
+
+        stp_wrds = [wrd.replace('\n', '') for wrd in stp_wrds]
+            
+        return stp_wrds
+    
+    
     def lwr(self):
         '''fnc to lowercase text'''
         if isinstance(self.txt, str):
@@ -58,8 +72,11 @@ class Tokenize():
         return None
     
 
-    def rmv_stpwrds(self, stpwrds):
-        '''function to remove  a list of stop words'''
+    def rmv_stpwrds(self, stpwrds=None):
+        '''function to remove a list of stop words'''
+        
+        if stpwrds is None:
+            stpwrds = self.gt_stpwrds()
         
         if isinstance(self.txt, str):
             for stpwrd in stpwrds:
