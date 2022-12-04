@@ -89,7 +89,7 @@ class Tokenize():
             #might want to add option for == vs in 
             for stpwrd in stpwrds:
                 for tkn in self.txt:
-                    if tkn == stpwrd:
+                    if tkn.casefold() == stpwrd.casefold():
                         self.txt.remove(tkn)
                 
         return None

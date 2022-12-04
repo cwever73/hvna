@@ -203,16 +203,15 @@ def tfidf_ggl_srch(srch_on, flnm):
     tfidf_dct = {}
     tfidf_cls = TFIDF() 
     #look at first 5000 tokens
-    # print(txt_lst_dct[:5])
     print('**************************')
     print(f'Total Number of Tokens to Search for: {len(tot_srch_lst)}')
-    for tkn in tot_srch_lst[:5000]:
+    for tkn in tot_srch_lst[:500]:
         tfidf_cls.calc_tfidf(tkn, txt_lst_dct)
         if tfidf_cls.tfidf > 0:
-            tfidf_dct[tkn] = tfidf_cls.tfidf
+            tfidf_dct[tkn] = {'tfidf': tfidf_cls.tfidf, 'df': tfidf_cls.nm_docs_w_tkn}
         
     # print(tfidf_dct)
-    print(f'Saving results as: {flnm}')
+    print(f'Saving results here: {flnm}')
     with open(flnm, 'w+') as f:
         yaml.dump(tfidf_dct, f, allow_unicode=True)
     
@@ -225,14 +224,13 @@ if __name__ == "__main__":
     
     # total_nws_url_lst = gt_nws_urls()
     
-    
     if actn == 'tfidf_ggl_srch':
         
         srch_trm = input('What do you wanna google?  ')
         
         pth = input('Enter path to store tfidf scores:  ')
         
-        flnm = os.path.join(pth, f"tfidf_scores_{srch_trm.replace(' ', '_')}_srch.yaml")
+        flnm = os.path.join(pth, f"tfidf_scores_{srch_trm.replace(' ', '_')}_search.yaml")
         
         tfidf_ggl_srch(srch_trm, flnm)
         
