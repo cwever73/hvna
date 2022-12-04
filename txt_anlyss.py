@@ -144,10 +144,10 @@ class TFIDF(Tokenize):
         super().__init__('')
         
     def trm_frq(self, tkn, txt):
-        '''func to count number of times token appears 
-           in already tokenized text'''
+        '''func to count number of times token appears'''
         
         self.txt = txt
+        self.lwr()
         self.phrs_cnt(len(tkn.split(' ')))
         wrd_cnt_dct = self.wrd_cnt()
         
@@ -166,22 +166,30 @@ class TFIDF(Tokenize):
     def inv_doc_frq(self):
         '''func calculates inverse document frequency'''
         
-        tot_nm_docs = len(self.tf_lst_dct)
-        nm_docs_w_tkn = len([txt for txt in self.tf_lst_dct if txt['term_freq'] is not None])
+        self.tot_nm_docs = len(self.tf_lst_dct)
+        self.nm_docs_w_tkn = len([txt for txt in self.tf_lst_dct if txt['term_freq'] > 0])
         
-        if nm_docs_w_tkn == 0:
+        if self.nm_docs_w_tkn == 0:
             print('Token did not appear in any documents.')
             self.df = 0
         else:
-            self.df = math.log(tot_nm_docs/nm_docs_w_tkn)
+            self.df = math.log10(self.tot_nm_docs/self.nm_docs_w_tkn)
     
     
-    def calc_tfidf(self, tkn, txt_lst_dct):
+    def calc_tfidf(self, tkn, txt_lst_dct, preprcss_tf=False):
         '''func calculates tfidf given a list of dictionaries of text 
            (each element being a document) and a term'''
         
         self.tf_lst_dct = txt_lst_dct
         for txt in self.tf_lst_dct:
+            if preprcss_tf:
+                self.txt = txt['text']
+                self.rmv_pnc()
+                self.lwr()
+                self.tknz()
+                self.rmv_whtsp()
+                txt['text'] = self.txt 
+                
             self.trm_frq(tkn, txt['text'])
             txt['token'] = tkn
             txt['term_freq'] = self.tf
@@ -189,7 +197,7 @@ class TFIDF(Tokenize):
         self.inv_doc_frq()
         
         for doc in self.tf_lst_dct:
-            print(doc['term_freq'], self.df)
+            # print(doc['term_freq'], self.df, self.tot_nm_docs, self.nm_docs_w_tkn)
             doc['tfidf'] = doc['term_freq'] * self.df
 
         print(self.tf_lst_dct)

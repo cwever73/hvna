@@ -7,12 +7,35 @@ Script tests text anlysis class functions.
 
 @author: carl
 """
+
+import sys
 import time
-from txt_anlyss import Tokenize
+from txt_anlyss import Tokenize, TFIDF
 
+def tst_tfidf():
+    '''func tests TFIDF Calculator'''
 
-if __name__ == "__main__":
-    t0 = time.time()
+    doc0 = 'Moses supposes his toeses are roses. But Moses supposes erroneously'
+    doc1 = 'And Moses, he knowses his toeses aren\'t roses. As Moses supposes his toeses to be'
+    
+    tfidf_cls = TFIDF()
+    
+    print('Test with word not in docs:\n')
+    tfidf_cls.calc_tfidf('quarter', [{'text': doc0}, {'text': doc1}])
+   
+    print('Test with no pre-processing:\n')
+    tfidf_cls.calc_tfidf('Moses', [{'text': doc0}, {'text': doc1}])
+    
+    print('Test with word preprocessing:\n')
+    tfidf_cls.calc_tfidf('Moses', [{'text': doc0}, {'text': doc1}], preprcss_tf=True)
+    
+    print('Test with word preprocessing:\n')
+    tfidf_cls.calc_tfidf('toeses', [{'text': doc0}, {'text': doc1}], preprcss_tf=True)
+    
+    
+
+def tst_tknzr():
+    '''func tests Tokenize class'''
     
     tst_str_cln = '''I must not fear. Fear is the mind-killer. 
     Fear is the little-death that brings total obliteration. 
@@ -63,5 +86,17 @@ if __name__ == "__main__":
     tknz_cls.rmv_whtsp()
     tknz_cls.cnctnt()
     print(f'Removing \'mind\' and \'fear\' from text:\n{tknz_cls.txt}')
+   
+
+if __name__ == "__main__":
+    t0 = time.time()
+    
+    actn = sys.argv[1]
+    
+    if actn == 'tst_tknzr':
+        tst_tknzr() 
+    elif actn == 'tst_tfidf':
+        tst_tfidf()
+    
     
     print(f'Script took {time.time()-t0}s to run.')
