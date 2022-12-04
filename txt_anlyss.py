@@ -8,6 +8,7 @@ Script holds classes peratining to text analysis.
 @author: carl
 """
 
+from collections import Counter
 import string
 
 class Tokenize():
@@ -72,7 +73,7 @@ class Tokenize():
         return None
     
 
-    def rmv_stpwrds(self, stpwrds=None):
+    def rmv_stpwrds(self, stpwrds=None, eq_tf=True):
         '''function to remove a list of stop words'''
         
         if stpwrds is None:
@@ -80,6 +81,7 @@ class Tokenize():
         
         if isinstance(self.txt, str):
             for stpwrd in stpwrds:
+                print(stpwrd)
                 self.txt = self.txt.replace(stpwrd, '')
         
         elif isinstance(self.txt, list):
@@ -88,7 +90,7 @@ class Tokenize():
                 for tkn in self.txt:
                     if tkn == stpwrd:
                         self.txt.remove(tkn)
-            
+                
         return None
         
     def rmv_whtsp(self):
@@ -113,4 +115,27 @@ class Tokenize():
             self.txt = self.txt.split(delim)
         
         return None
+
+    def wrd_cnt(self):
+        '''func to count words or phrases'''
+        
+        if isinstance(self.txt, str):
+            self.tknz()
+            return self.wrd_cnt()
+        elif isinstance(self.txt, list):
+            return Counter(self.txt)
+        
+        
+    
+    
+class TFIDF():
+    
+    def __init__(self, txt_dct):
+        self.txt_dct = txt_dct
+        
+    def tf(self):
+        pass
+
+    def df(self):
+        pass
 

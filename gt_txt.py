@@ -10,7 +10,6 @@ Script gets text from desired urls.
 
 from bs4 import BeautifulSoup as btflSp
 from datetime import datetime as dt
-from nltk.corpus import stopwords
 import requests
 import sys
 import time
@@ -165,9 +164,21 @@ if __name__ == "__main__":
             #second sweep, look for all punctuation
             tknz_cls.rmv_pnc()
             print(tknz_cls.txt)
+            #split up string by spaces
+            tknz_cls.tknz()
+            #remove white space
+            tknz_cls.rmv_whtsp()
             #now remove typical English stopwords
             tknz_cls.rmv_stpwrds(stpwrds)
-            print(tknz_cls.txt)
+            #put list of strings back together
+            # tknz_cls.cnctnt()
+            # print(tknz_cls.txt)
+            tknz_cls.lwr()
+            tknz_cls.cnctnt()
+            #remove numbers
+            tknz_cls.rmv_stpwrds(['0','1','2','3','4','5','6','7','8','9'])
+            x1 = tknz_cls.wrd_cnt()
+            
             
             
     
