@@ -152,6 +152,71 @@ def gt_txt(url_lst):
         
     
     return url_txt
+
+
+def tfidf_ggl_srch(srch_on, flnm):
+    '''given a term to search for and a filename, wrtie tfidf scores
+       for all urls on first page of google result for tokens up to length 3'''
+
+    #TODO: add param for # pages of google results to look thru
+    #TODO: maybe make phrase length a variable
+
+    tot_ggl_urls = gt_ggl_urls(srch_on)
+    
+    txt_lst_dct = gt_txt(tot_ggl_urls)
+    
+    print(f'Number of URLs Scraped: {len(txt_lst_dct)}')
+    
+    tknz_cls = Tokenize('')
+    stpwrds = tknz_cls.gt_stpwrds()
+    
+    tot_srch_lst = []
+    for data_dct in txt_lst_dct:
+        # print(data_dct)
+        tknz_cls = Tokenize(data_dct['text'])
+        #first sweep, remove \n in text
+        tknz_cls.rmv_pnc(pnc_lst=['\n'], rplc=' ')
+        #second sweep, look for all punctuation
+        tknz_cls.rmv_pnc()
+        #split up string by spaces
+        tknz_cls.tknz()
+        #remove white space
+        tknz_cls.rmv_whtsp()
+        #now remove typical English stopwords
+        tknz_cls.rmv_stpwrds(stpwrds)
+        #put list of strings back together
+        tknz_cls.lwr()
+        tknz_cls.cnctnt()
+        #remove numbers
+        tknz_cls.rmv_stpwrds(['0','1','2','3','4','5','6','7','8','9'])
+        data_dct['word_count'] = tknz_cls.wrd_cnt()
+        
+        #get list of tokens to calculate tfidf
+        mx_phrs_lngth = 3 #search for phrases up to 3 words in length
+        for phrs_lngth in range(1, mx_phrs_lngth+1):
+            phrs_lst_lst = [tknz_cls.txt[indx : indx+phrs_lngth] for indx, i in enumerate(tknz_cls.txt)]
+            phrs_lst = [' '.join(phrs_lst) for phrs_lst in phrs_lst_lst]
+            tot_srch_lst += phrs_lst
+        
+    tot_srch_lst = list(set(tot_srch_lst))
+    #create dictionary of all token's tfidf scores
+    tfidf_dct = {}
+    tfidf_cls = TFIDF() 
+    #look at first 5000 tokens
+    # print(txt_lst_dct[:5])
+    print('**************************')
+    print(f'Total Number of Tokens to Search for: {len(tot_srch_lst)}')
+    for tkn in tot_srch_lst[:5000]:
+        tfidf_cls.calc_tfidf(tkn, txt_lst_dct)
+        if tfidf_cls.tfidf > 0:
+            tfidf_dct[tkn] = tfidf_cls.tfidf
+        
+    # print(tfidf_dct)
+    print(f'Saving results as: {flnm}')
+    with open(flnm, 'w+') as f:
+        yaml.dump(tfidf_dct, f, allow_unicode=True)
+    
+    
     
 if __name__ == "__main__":
     t0 = time.time()
@@ -161,73 +226,15 @@ if __name__ == "__main__":
     # total_nws_url_lst = gt_nws_urls()
     
     
-    if actn == 'ggl_srch':
-        #google search (first page)
-        #TODO: add param for # pages of google results to look thru
-        srch_on = input('What do you wanna google?  ')
-        tot_ggl_urls = gt_ggl_urls(srch_on)
+    if actn == 'tfidf_ggl_srch':
+        
+        srch_trm = input('What do you wanna google?  ')
         
         pth = input('Enter path to store tfidf scores:  ')
         
-        flnm = os.path.join(pth, f"tfidf_scores_{srch_on.replace(' ', '_')}_srch.yaml")
+        flnm = os.path.join(pth, f"tfidf_scores_{srch_trm.replace(' ', '_')}_srch.yaml")
         
-        
-        
-        txt_lst_dct = gt_txt(tot_ggl_urls)
-        
-        print(f'Number of URLs Scraped: {len(txt_lst_dct)}')
-        # print(txt_lst_dct)
-        # print(txt_lst_dct[3:7])
-        
-        tknz_cls = Tokenize('')
-        stpwrds = tknz_cls.gt_stpwrds()
-        
-        tot_srch_lst = []
-        for data_dct in txt_lst_dct:
-            # print(data_dct)
-            tknz_cls = Tokenize(data_dct['text'])
-            #first sweep, remove \n in text
-            tknz_cls.rmv_pnc(pnc_lst=['\n'], rplc=' ')
-            #second sweep, look for all punctuation
-            tknz_cls.rmv_pnc()
-            #split up string by spaces
-            tknz_cls.tknz()
-            #remove white space
-            tknz_cls.rmv_whtsp()
-            #now remove typical English stopwords
-            tknz_cls.rmv_stpwrds(stpwrds)
-            #put list of strings back together
-            tknz_cls.lwr()
-            tknz_cls.cnctnt()
-            #remove numbers
-            tknz_cls.rmv_stpwrds(['0','1','2','3','4','5','6','7','8','9'])
-            data_dct['word_count'] = tknz_cls.wrd_cnt()
-            
-            #get list of tokens to calculate tfidf
-            mx_phrs_lngth = 3 #search for phrases up to 3 words in length
-            for phrs_lngth in range(1, mx_phrs_lngth+1):
-                phrs_lst_lst = [tknz_cls.txt[indx : indx+phrs_lngth] for indx, i in enumerate(tknz_cls.txt)]
-                phrs_lst = [' '.join(phrs_lst) for phrs_lst in phrs_lst_lst]
-                tot_srch_lst += phrs_lst
-            
-        tot_srch_lst = list(set(tot_srch_lst))
-        #create dictionary of all token's tfidf scores
-        tfidf_dct = {}
-        tfidf_cls = TFIDF() 
-        #look at first 50 tokens
-        # print(txt_lst_dct[:5])
-        print('**************************')
-        print(f'Total Number of Tokens to Search for: {len(tot_srch_lst)}')
-        # print(tot_srch_lst[:50])
-        for tkn in tot_srch_lst[:5000]:
-            tfidf_cls.calc_tfidf(tkn, txt_lst_dct)
-            if tfidf_cls.tfidf > 0:
-                tfidf_dct[tkn] = tfidf_cls.tfidf
-            
-        # print(tfidf_dct)
-        print(f'Saving results as: {flnm}')
-        with open(flnm, 'w+') as f:
-            yaml.dump(tfidf_dct, f, allow_unicode=True)
+        tfidf_ggl_srch(srch_trm, flnm)
         
             
             
