@@ -9,6 +9,7 @@ Script holds classes peratining to text analysis.
 """
 
 from collections import Counter
+import math
 import string
 
 class Tokenize():
@@ -124,25 +125,71 @@ class Tokenize():
             return self.wrd_cnt()
         elif isinstance(self.txt, list):
             return dict(Counter(self.txt))
+    def phrs_cnt(self, phrs_lngth):
+        '''func to count phrases given a phrase length'''
+        
+        if isinstance(self.txt, str):
+            self.tknz()
+            self.phrs_cnt(phrs_lngth)
+        elif isinstance(self.txt, list):
+            phrs_lst_lst = [self.txt[indx : indx+phrs_lngth] for indx, i in enumerate(self.txt)]
+            self.txt = [' '.join(phrs_lst) for phrs_lst in phrs_lst_lst]
+            
         
         
     
 class TFIDF(Tokenize):
     
-    def __init__(self, txt_dct):
-        self.txt_dct = txt_dct
+    def __init__(self):
         super().__init__('')
         
-    def tf(self, tkn, txt):
-        '''func to count number of times token appears in already tokenized text'''
-        lngth =len(tkn.split(' '))
-        phrs_lst_lst = [txt[indx : indx+lngth] for indx, i in enumerate(txt)]
-        self.txt = [' '.join(phrs_lst) for phrs_lst in phrs_lst_lst]
+    def trm_frq(self, tkn, txt):
+        '''func to count number of times token appears 
+           in already tokenized text'''
+        
+        self.txt = txt
+        self.phrs_cnt(len(tkn.split(' ')))
         wrd_cnt_dct = self.wrd_cnt()
         
+        tot_nm_tkn = sum(wrd_cnt_dct.values())
         
+        tkn = tkn.casefold()
+        if tkn in [ky.casefold() for ky in wrd_cnt_dct.keys()]:
+            print(f'{tkn} showed up {wrd_cnt_dct[tkn]} time(s)')
+            self.tf = wrd_cnt_dct[tkn]/tot_nm_tkn
+        else:
+            print(f'{tkn} did not show up')
+            print(list(wrd_cnt_dct.keys()))
+            self.tf =  0
         
 
-    def df(self):
-        pass
+    def inv_doc_frq(self):
+        '''func calculates inverse document frequency'''
+        
+        tot_nm_docs = len(self.tf_lst_dct)
+        nm_docs_w_tkn = len([txt for txt in self.tf_lst_dct if txt['term_freq'] is not None])
+        
+        if nm_docs_w_tkn == 0:
+            print('Token did not appear in any documents.')
+            self.df = 0
+        else:
+            self.df = math.log(tot_nm_docs/nm_docs_w_tkn)
+    
+    
+    def calc_tfidf(self, tkn, txt_lst_dct):
+        '''func calculates tfidf given a list of dictionaries of text 
+           (each element being a document) and a term'''
+        
+        self.tf_lst_dct = txt_lst_dct
+        for txt in self.tf_lst_dct:
+            self.trm_frq(tkn, txt['text'])
+            txt['token'] = tkn
+            txt['term_freq'] = self.tf
+            
+        self.inv_doc_frq()
+        
+        for doc in self.tf_lst_dct:
+            print(doc['term_freq'], self.df)
+            doc['tfidf'] = doc['term_freq'] * self.df
 
+        print(self.tf_lst_dct)
