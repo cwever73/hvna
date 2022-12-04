@@ -123,18 +123,25 @@ class Tokenize():
             self.tknz()
             return self.wrd_cnt()
         elif isinstance(self.txt, list):
-            return Counter(self.txt)
+            return dict(Counter(self.txt))
         
         
     
-    
-class TFIDF():
+class TFIDF(Tokenize):
     
     def __init__(self, txt_dct):
         self.txt_dct = txt_dct
+        super().__init__('')
         
-    def tf(self):
-        pass
+    def tf(self, tkn, txt):
+        '''func to count number of times token appears in already tokenized text'''
+        lngth =len(tkn.split(' '))
+        phrs_lst_lst = [txt[indx : indx+lngth] for indx, i in enumerate(txt)]
+        self.txt = [' '.join(phrs_lst) for phrs_lst in phrs_lst_lst]
+        wrd_cnt_dct = self.wrd_cnt()
+        
+        
+        
 
     def df(self):
         pass
