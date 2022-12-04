@@ -10,27 +10,48 @@ Script gets text from desired urls.
 
 from bs4 import BeautifulSoup as btflSp
 from datetime import datetime as dt
+import os
 import requests
 import sys
 import time
-from txt_anlyss import Tokenize
+from txt_anlyss import Tokenize, TFIDF
+import yaml
 
 
 def gt_ggl_urls(srch_trm):
     '''func to grab urls from a particular google search'''
     
+    skp_dmns = ('https://www.google.', 
+                'https://google.', 
+                'https://webcache.googleusercontent.', 
+                'http://webcache.googleusercontent.', 
+                'https://policies.google.',
+                'https://support.google.',
+                'https://maps.google.',
+                 'https://www.youtube.com')
+    
     srch_trm = srch_trm.replace(' ', '+')
     url = f'https://www.google.com/search?q={srch_trm}'
     print(f'URL: {url}')
     reqs = requests.get(url)
+    print('###########################')
+    
     soup = btflSp(reqs.text, 'html.parser')
     
     ggl_url_lst = []
     for indx, link in enumerate(soup.find_all('a')):
         print(indx, link.get('href'))
-        if '/url?q=' in link.get('href'):
-            nw_url = link.get('href').split('/url?q=')[1]
-            ggl_url_lst.append(nw_url)
+        
+        skip_tf = False
+       
+        for ggl_dmn in skp_dmns:
+            if ggl_dmn == link.get('href')[len('/url?q='):len('/url?q=')+len(ggl_dmn)]:
+                skip_tf = True #just a site we dont care about (standard google sites, youtube)
+        
+        if not skip_tf:
+            if '/url?q=' in link.get('href'):
+                    nw_url = link.get('href').split('/url?q=')[1].split('&sa=U&ved')[0]
+                    ggl_url_lst.append(nw_url)
     
     print(ggl_url_lst)
     
@@ -146,24 +167,29 @@ if __name__ == "__main__":
         srch_on = input('What do you wanna google?  ')
         tot_ggl_urls = gt_ggl_urls(srch_on)
         
+        pth = input('Enter path to store tfidf scores:  ')
+        
+        flnm = os.path.join(pth, f"tfidf_scores_{srch_on.replace(' ', '_')}_srch.yaml")
+        
+        
+        
         txt_lst_dct = gt_txt(tot_ggl_urls)
         
         print(f'Number of URLs Scraped: {len(txt_lst_dct)}')
         # print(txt_lst_dct)
-        print(txt_lst_dct[3:7])
+        # print(txt_lst_dct[3:7])
         
         tknz_cls = Tokenize('')
         stpwrds = tknz_cls.gt_stpwrds()
         
-        for data_dct in txt_lst_dct[:10]:
-            print(data_dct)
+        tot_srch_lst = []
+        for data_dct in txt_lst_dct:
+            # print(data_dct)
             tknz_cls = Tokenize(data_dct['text'])
             #first sweep, remove \n in text
             tknz_cls.rmv_pnc(pnc_lst=['\n'], rplc=' ')
-            print(tknz_cls.txt)
             #second sweep, look for all punctuation
             tknz_cls.rmv_pnc()
-            print(tknz_cls.txt)
             #split up string by spaces
             tknz_cls.tknz()
             #remove white space
@@ -171,13 +197,38 @@ if __name__ == "__main__":
             #now remove typical English stopwords
             tknz_cls.rmv_stpwrds(stpwrds)
             #put list of strings back together
-            # tknz_cls.cnctnt()
-            # print(tknz_cls.txt)
             tknz_cls.lwr()
             tknz_cls.cnctnt()
             #remove numbers
             tknz_cls.rmv_stpwrds(['0','1','2','3','4','5','6','7','8','9'])
-            x1 = tknz_cls.wrd_cnt()
+            data_dct['word_count'] = tknz_cls.wrd_cnt()
+            
+            #get list of tokens to calculate tfidf
+            mx_phrs_lngth = 3 #search for phrases up to 3 words in length
+            for phrs_lngth in range(1, mx_phrs_lngth+1):
+                phrs_lst_lst = [tknz_cls.txt[indx : indx+phrs_lngth] for indx, i in enumerate(tknz_cls.txt)]
+                phrs_lst = [' '.join(phrs_lst) for phrs_lst in phrs_lst_lst]
+                tot_srch_lst += phrs_lst
+            
+        tot_srch_lst = list(set(tot_srch_lst))
+        #create dictionary of all token's tfidf scores
+        tfidf_dct = {}
+        tfidf_cls = TFIDF() 
+        #look at first 50 tokens
+        # print(txt_lst_dct[:5])
+        print('**************************')
+        print(f'Total Number of Tokens to Search for: {len(tot_srch_lst)}')
+        # print(tot_srch_lst[:50])
+        for tkn in tot_srch_lst[:5000]:
+            tfidf_cls.calc_tfidf(tkn, txt_lst_dct)
+            if tfidf_cls.tfidf > 0:
+                tfidf_dct[tkn] = tfidf_cls.tfidf
+            
+        # print(tfidf_dct)
+        print(f'Saving results as: {flnm}')
+        with open(flnm, 'w+') as f:
+            yaml.dump(tfidf_dct, f, allow_unicode=True)
+        
             
             
             

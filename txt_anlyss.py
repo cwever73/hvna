@@ -57,7 +57,7 @@ class Tokenize():
         '''func to remove specified punctuation from inputted text'''
         
         if pnc_lst is None:
-            pnc_lst = string.punctuation
+            pnc_lst = string.punctuation + '\\"'
         
         if isinstance(self.txt, str):
             for pnc in pnc_lst:
@@ -82,7 +82,7 @@ class Tokenize():
         
         if isinstance(self.txt, str):
             for stpwrd in stpwrds:
-                print(stpwrd)
+                # print(stpwrd)
                 self.txt = self.txt.replace(stpwrd, '')
         
         elif isinstance(self.txt, list):
@@ -125,41 +125,43 @@ class Tokenize():
             return self.wrd_cnt()
         elif isinstance(self.txt, list):
             return dict(Counter(self.txt))
-    def phrs_cnt(self, phrs_lngth):
-        '''func to count phrases given a phrase length'''
+    
+    def phrs(self, phrs_lngth):
+        '''func to chunk text into phrases given a phrase length'''
         
         if isinstance(self.txt, str):
             self.tknz()
-            self.phrs_cnt(phrs_lngth)
+            self.phrs(phrs_lngth)
         elif isinstance(self.txt, list):
             phrs_lst_lst = [self.txt[indx : indx+phrs_lngth] for indx, i in enumerate(self.txt)]
             self.txt = [' '.join(phrs_lst) for phrs_lst in phrs_lst_lst]
-            
-        
         
     
 class TFIDF(Tokenize):
     
-    def __init__(self):
+    def __init__(self, vrbs_tf=False):
         super().__init__('')
+        self.vrbs_tf = vrbs_tf
         
     def trm_frq(self, tkn, txt):
         '''func to count number of times token appears'''
         
         self.txt = txt
         self.lwr()
-        self.phrs_cnt(len(tkn.split(' ')))
+        self.phrs(len(tkn.split(' ')))
         wrd_cnt_dct = self.wrd_cnt()
         
         tot_nm_tkn = sum(wrd_cnt_dct.values())
         
         tkn = tkn.casefold()
         if tkn in [ky.casefold() for ky in wrd_cnt_dct.keys()]:
-            print(f'{tkn} showed up {wrd_cnt_dct[tkn]} time(s)')
+            if self.vrbs_tf:
+                print(f'{tkn} showed up {wrd_cnt_dct[tkn]} time(s)')
             self.tf = wrd_cnt_dct[tkn]/tot_nm_tkn
         else:
-            print(f'{tkn} did not show up')
-            print(list(wrd_cnt_dct.keys()))
+            if self.vrbs_tf:
+                print(f'{tkn} did not show up')
+                # print(list(wrd_cnt_dct.keys()))
             self.tf =  0
         
 
@@ -170,7 +172,8 @@ class TFIDF(Tokenize):
         self.nm_docs_w_tkn = len([txt for txt in self.tf_lst_dct if txt['term_freq'] > 0])
         
         if self.nm_docs_w_tkn == 0:
-            print('Token did not appear in any documents.')
+            if self.vrbs_tf:
+                print('Token did not appear in any documents.')
             self.df = 0
         else:
             self.df = math.log10(self.tot_nm_docs/self.nm_docs_w_tkn)
@@ -198,6 +201,9 @@ class TFIDF(Tokenize):
         
         for doc in self.tf_lst_dct:
             # print(doc['term_freq'], self.df, self.tot_nm_docs, self.nm_docs_w_tkn)
-            doc['tfidf'] = doc['term_freq'] * self.df
+            self.tfidf = doc['term_freq'] * self.df
+            doc['tfidf'] = self.tfidf
+            doc['doc_freq'] = self.nm_docs_w_tkn
 
-        print(self.tf_lst_dct)
+        if self.vrbs_tf:
+            print(self.tf_lst_dct)

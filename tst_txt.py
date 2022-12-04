@@ -18,7 +18,7 @@ def tst_tfidf():
     doc0 = 'Moses supposes his toeses are roses. But Moses supposes erroneously'
     doc1 = 'And Moses, he knowses his toeses aren\'t roses. As Moses supposes his toeses to be'
     
-    tfidf_cls = TFIDF()
+    tfidf_cls = TFIDF(vrbs_tf=True)
     
     print('Test with word not in docs:\n')
     tfidf_cls.calc_tfidf('quarter', [{'text': doc0}, {'text': doc1}])
