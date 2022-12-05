@@ -57,7 +57,7 @@ class Tokenize():
         '''func to remove specified punctuation from inputted text'''
         
         if pnc_lst is None:
-            pnc_lst = string.punctuation + '\\"'
+            pnc_lst = string.punctuation + '“”'
         
         if isinstance(self.txt, str):
             for pnc in pnc_lst:

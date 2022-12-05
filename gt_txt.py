@@ -189,6 +189,9 @@ def tfidf_ggl_srch(srch_on, flnm):
         tknz_cls.cnctnt()
         #remove numbers
         tknz_cls.rmv_stpwrds(['0','1','2','3','4','5','6','7','8','9'])
+        tknz_cls.tknz()
+        tknz_cls.rmv_stpwrds(stpwrds)
+        tknz_cls.cnctnt()
         data_dct['word_count'] = tknz_cls.wrd_cnt()
         
         #get list of tokens to calculate tfidf
@@ -205,7 +208,11 @@ def tfidf_ggl_srch(srch_on, flnm):
     #look at first 5000 tokens
     print('**************************')
     print(f'Total Number of Tokens to Search for: {len(tot_srch_lst)}')
-    for tkn in tot_srch_lst[:500]:
+    for indx, tkn in enumerate(tot_srch_lst):
+        if indx > 0:
+            if indx%2701 == 0:
+                print(indx/len(tot_srch_lst))
+                
         tfidf_cls.calc_tfidf(tkn, txt_lst_dct)
         if tfidf_cls.tfidf > 0:
             tfidf_dct[tkn] = {'tfidf': tfidf_cls.tfidf, 'df': tfidf_cls.nm_docs_w_tkn}
@@ -222,7 +229,17 @@ if __name__ == "__main__":
     
     actn = sys.argv[1]
     
-    # total_nws_url_lst = gt_nws_urls()
+    
+    if actn == 'gt_nws':
+        
+        flnm = input('Enter yaml that holds tfidf scores:  ')
+        
+        with open(flnm) as f:
+            tfidf_dct = yaml.load(f, yaml.SafeLoader)
+        
+        tot_nws_url_lst = gt_nws_urls()
+        
+        gt_txt(tot_nws_url_lst)
     
     if actn == 'tfidf_ggl_srch':
         
@@ -235,8 +252,4 @@ if __name__ == "__main__":
         tfidf_ggl_srch(srch_trm, flnm)
         
             
-            
-            
-    
     print(f'Script took {time.time()-t0}s to run.')
-    

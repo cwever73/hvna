@@ -38,11 +38,11 @@ if __name__ == "__main__":
     
     actn = sys.argv[1]
     
-    if actn == 'plt':
+    if actn == 'plt_tfidf':
         
         flnm = input('Enter yaml that holds tfidf scores:  ')
+        
         with open(flnm) as f:
-            
             tfidf_dct = yaml.load(f, yaml.SafeLoader)
         
         x_lst = [tfidf_dct[tkn]['df'] for tkn in tfidf_dct]
