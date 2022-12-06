@@ -52,16 +52,36 @@ class Tokenize():
             
         return None
         
+    def rmv_nmbrs(self):
+        '''func to remove numbers from text'''
+        
+        if isinstance(self.txt, str):
+            for nmbr in ['0','1','2','3','4','5','6','7','8','9']:
+                # print(stpwrd)
+                self.txt = self.txt.replace(nmbr, '')
+        
+        elif isinstance(self.txt, list):
+            tmp_txt = []
+            for tkn in self.txt:
+                for chctr in tkn:
+                    if chctr.isnumeric():
+                        tkn = tkn.replace(chctr, '')
+                tmp_txt.append(tkn)
+            
+            self.txt = tmp_txt
+                
+        return None
         
     def rmv_pnc(self, pnc_lst=None, rplc=''):
         '''func to remove specified punctuation from inputted text'''
         
         if pnc_lst is None:
-            pnc_lst = string.punctuation + '“”'
+            pnc_lst = string.punctuation + '“”–'
         
         if isinstance(self.txt, str):
             for pnc in pnc_lst:
                 self.txt = self.txt.replace(pnc, rplc)
+                    
                 
         elif isinstance(self.txt, list):
             tmp_txt = []

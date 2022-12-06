@@ -167,31 +167,30 @@ def tfidf_ggl_srch(srch_on, flnm):
     
     print(f'Number of URLs Scraped: {len(txt_lst_dct)}')
     
-    tknz_cls = Tokenize('')
-    stpwrds = tknz_cls.gt_stpwrds()
-    
     tot_srch_lst = []
     for data_dct in txt_lst_dct:
         # print(data_dct)
+        # print(data_dct['text'][-500:])
         tknz_cls = Tokenize(data_dct['text'])
         #first sweep, remove \n in text
         tknz_cls.rmv_pnc(pnc_lst=['\n'], rplc=' ')
         #second sweep, look for all punctuation
-        tknz_cls.rmv_pnc()
+        tknz_cls.rmv_pnc(rplc=' ')
         #split up string by spaces
         tknz_cls.tknz()
         #remove white space
         tknz_cls.rmv_whtsp()
+        print(tknz_cls.txt)
         #now remove typical English stopwords
-        tknz_cls.rmv_stpwrds(stpwrds)
+        tknz_cls.rmv_stpwrds()
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1')
+        print(tknz_cls.txt)
         #put list of strings back together
         tknz_cls.lwr()
-        tknz_cls.cnctnt()
         #remove numbers
-        tknz_cls.rmv_stpwrds(['0','1','2','3','4','5','6','7','8','9'])
-        tknz_cls.tknz()
-        tknz_cls.rmv_stpwrds(stpwrds)
+        tknz_cls.rmv_nmbrs()
         tknz_cls.cnctnt()
+        print(tknz_cls.txt)
         data_dct['word_count'] = tknz_cls.wrd_cnt()
         
         #get list of tokens to calculate tfidf
@@ -205,7 +204,6 @@ def tfidf_ggl_srch(srch_on, flnm):
     #create dictionary of all token's tfidf scores
     tfidf_dct = {}
     tfidf_cls = TFIDF() 
-    #look at first 5000 tokens
     print('**************************')
     print(f'Total Number of Tokens to Search for: {len(tot_srch_lst)}')
     for indx, tkn in enumerate(tot_srch_lst):
@@ -217,7 +215,7 @@ def tfidf_ggl_srch(srch_on, flnm):
         if tfidf_cls.tfidf > 0:
             tfidf_dct[tkn] = {'tfidf': tfidf_cls.tfidf, 'df': tfidf_cls.nm_docs_w_tkn}
         
-    # print(tfidf_dct)
+    print(tfidf_dct)
     print(f'Saving results here: {flnm}')
     with open(flnm, 'w+') as f:
         yaml.dump(tfidf_dct, f, allow_unicode=True)
