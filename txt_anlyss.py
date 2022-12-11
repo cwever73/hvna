@@ -51,6 +51,21 @@ class Tokenize():
             self.txt = [tkn.casefold() for tkn in self.txt]
             
         return None
+    
+    def rmv_gnrl(self, bad_tkn):
+        '''func to remove '' in list of tokens'''
+
+        if isinstance(self.txt, str):
+             self.tknz()
+             
+             self.rmv_blnks()
+         
+        elif isinstance(self.txt, list):
+           
+            self.txt  = [tkn for tkn in self.txt if tkn != bad_tkn]
+             
+        return None
+
         
     def rmv_nmbrs(self):
         '''func to remove numbers from text'''
@@ -121,7 +136,7 @@ class Tokenize():
             self.txt = self.txt.strip()
         
         elif isinstance(self.txt, list):
-            self.txt = [tkn.strip() for tkn in self.txt]
+            self.txt = [tkn.strip() for tkn in self.txt if tkn != '' and tkn != ' ']
             
         return None
         

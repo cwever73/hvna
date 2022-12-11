@@ -46,9 +46,9 @@ def tst_tknzr():
     
     tst_str_mssy = '''    I must% not fear. Fear is the mind-killer.     
     Fear is the little-death that brings total oblite**ration. 
-    I will face my\\ Fear. I will permit! it to pass over me and through me. 
+    I will face my\\ Fear. I 3will permit! it to pass over me and  67 through me. 
     And///when it has (gone ) past I will turn the INNER eye to see its path. 
-    Where the fear has gone there-will_be nothing    . Only I will remain.'''
+    Where the fear has gone there-will_be 09nothing    . Only I will remain.'''
     
     print(f'Original Messy String:\n{tst_str_mssy}')
     
@@ -84,8 +84,9 @@ def tst_tknzr():
     tknz_cls.rmv_stpwrds(['fear', 'mind'])
     tknz_cls.tknz()
     tknz_cls.rmv_whtsp()
+    tknz_cls.rmv_nmbrs()
     tknz_cls.cnctnt()
-    print(f'Removing \'mind\' and \'fear\' from text:\n{tknz_cls.txt}')
+    print(f'Removing \'mind\' and \'fear\' and numerics from text:\n{tknz_cls.txt}')
    
 
 if __name__ == "__main__":

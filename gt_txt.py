@@ -173,25 +173,23 @@ def tfidf_ggl_srch(srch_on, flnm):
         # print(data_dct['text'][-500:])
         tknz_cls = Tokenize(data_dct['text'])
         #first sweep, remove \n in text
-        tknz_cls.rmv_pnc(pnc_lst=['\n'], rplc=' ')
+        tknz_cls.rmv_pnc(pnc_lst=['\n', '\t', '\r'], rplc=' ')
         #second sweep, look for all punctuation
         tknz_cls.rmv_pnc(rplc=' ')
         #split up string by spaces
         tknz_cls.tknz()
         #remove white space
         tknz_cls.rmv_whtsp()
-        print(tknz_cls.txt)
         #now remove typical English stopwords
         tknz_cls.rmv_stpwrds()
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1')
-        print(tknz_cls.txt)
         #put list of strings back together
         tknz_cls.lwr()
         #remove numbers
         tknz_cls.rmv_nmbrs()
-        tknz_cls.cnctnt()
-        print(tknz_cls.txt)
+        tknz_cls.rmv_gnrl('')
+        # print(tknz_cls.txt)
         data_dct['word_count'] = tknz_cls.wrd_cnt()
+        data_dct['text'] = tknz_cls.txt
         
         #get list of tokens to calculate tfidf
         mx_phrs_lngth = 3 #search for phrases up to 3 words in length
@@ -230,14 +228,55 @@ if __name__ == "__main__":
     
     if actn == 'gt_nws':
         
-        flnm = input('Enter yaml that holds tfidf scores:  ')
+        # flnm = input('Enter yaml that holds tfidf scores:  ')
         
-        with open(flnm) as f:
-            tfidf_dct = yaml.load(f, yaml.SafeLoader)
+        # with open(flnm) as f:
+            # tfidf_dct_new = yaml.load(f, yaml.SafeLoader)
         
         tot_nws_url_lst = gt_nws_urls()
         
-        gt_txt(tot_nws_url_lst)
+        txt_lst_dct = gt_txt(tot_nws_url_lst)
+        
+        print(f'Number of URLs Scraped: {len(txt_lst_dct)}')
+        
+        bzz_wrds = ['neuroscience', 'cuba', 'ring', 'ringing', 'illness', 
+                  'mysterious', 'loud noise', 'ear', 'ears', 'pressure',
+                  'vibrations', 'head', 'concussion', 'tinnitus', 'vertigo',
+                  'nausea', 'cognitive difficulties', 'cognitive', 'embassy'
+                  'embassies', 'agent', 'agents', 'ambassador', 'ambassadors',
+                  'sonic', 'attack', 'diplomat', 'diplomats', 'noise', 'noises'
+                  'grating noises', 'grating', 'strange', 'home', 'hotel', 
+                  'hotels', 'hotel room',  'hotel rooms', 'device', 'beam',
+                  'memory loss', 'hearing loss', 'nausea'
+                  ]
+        
+        for data_dct in txt_lst_dct:
+            cnt = 0
+            tknz_cls = Tokenize(data_dct['text'])
+            #first sweep, remove \n in text
+            tknz_cls.rmv_pnc(pnc_lst=['\n'], rplc=' ')
+            #second sweep, look for all punctuation
+            tknz_cls.rmv_pnc(rplc=' ')
+            #split up string by spaces
+            tknz_cls.tknz()
+            #remove white space
+            tknz_cls.rmv_whtsp()
+            #now remove typical English stopwords
+            tknz_cls.rmv_stpwrds()
+            #put list of strings back together
+            tknz_cls.lwr()
+            #remove numbers
+            tknz_cls.rmv_nmbrs()
+            #put it back
+            tknz_cls.cnctnt()
+            for bzz in bzz_wrds:
+                if bzz in tknz_cls.txt:
+                    cnt += 1
+            data_dct['bzz_tkn_num'] = cnt
+            
+            print(data_dct['url'], data_dct['bzz_tkn_num'])
+            
+        
     
     if actn == 'tfidf_ggl_srch':
         

@@ -14,24 +14,25 @@ import sys
 import time
 import yaml
 
-def scttr_plt(x_lst, y_lst, desc_lst):
+def scttr_plt(x_lst, y_lst, desc_lst, title):
 
     output_file("../scttr_plt.html")
 
     source = ColumnDataSource(data=dict(x=x_lst, y=y_lst, desc=desc_lst))
     hover = HoverTool(tooltips=[
-        ("(df,tfidf)", "(@x, @y)"),
+        ("(df, tfidf)", "(@x, @y)"),
         ('desc', '@desc'),])
     
     
     mapper = LinearColorMapper(palette=viridis(256), low=min(y_lst), high=max(y_lst))
     
-    p = figure(width=400, height=400, tools=[hover], title="Belgian test")
+    p = figure(width=400, height=400, tools=[hover], title=title, toolbar_location="below")
     p.circle('x', 'y', size=10, source=source,
              fill_color=transform('y', mapper))
     
     
     show(p)
+    
 
 if __name__ == "__main__":
     t0 = time.time()
@@ -51,7 +52,7 @@ if __name__ == "__main__":
         
         tkn_lst = list(tfidf_dct.keys())
         
-        scttr_plt(x_lst,y_lst,tkn_lst)
+        scttr_plt(x_lst,y_lst,tkn_lst, 'TFIDF vs DF')
             
             
     
