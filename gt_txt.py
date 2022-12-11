@@ -186,6 +186,7 @@ def tfidf_ggl_srch(srch_on, flnm):
         tknz_cls.lwr()
         #remove numbers
         tknz_cls.rmv_nmbrs()
+        #remove those blanks in list of text
         tknz_cls.rmv_gnrl('')
         # print(tknz_cls.txt)
         data_dct['word_count'] = tknz_cls.wrd_cnt()

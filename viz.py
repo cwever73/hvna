@@ -6,7 +6,7 @@ Created on Sun Dec  4 18:24:36 2022
 @author: carl
 """
 
-from bokeh.models import ColumnDataSource, HoverTool,  LinearColorMapper
+from bokeh.models import ColumnDataSource, HoverTool,  LinearColorMapper, ToolbarPanel
 from bokeh.palettes import viridis
 from bokeh.plotting import figure, output_file, show
 from bokeh.transform import transform
@@ -26,12 +26,16 @@ def scttr_plt(x_lst, y_lst, desc_lst, title):
     
     mapper = LinearColorMapper(palette=viridis(256), low=min(y_lst), high=max(y_lst))
     
-    p = figure(width=400, height=400, tools=[hover], title=title, toolbar_location="below")
+    p = figure(width=400, height=400, tools=[hover,"box_zoom,pan,box_select,reset"], title=title, toolbar_location="below")
     p.circle('x', 'y', size=10, source=source,
              fill_color=transform('y', mapper))
+    # p.add_layout(ToolbarPanel)
     
     
     show(p)
+    
+    
+
     
 
 if __name__ == "__main__":
