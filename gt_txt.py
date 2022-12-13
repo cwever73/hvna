@@ -142,7 +142,12 @@ def gt_txt(url_lst):
     url_txt = []
     
     for url in url_lst:
-        reqs = requests.get(url)
+        
+        try:
+            reqs = requests.get(url)
+        except:
+            print(f'Error with this URL: {url}')
+        
         soup = btflSp(reqs.text, 'html.parser')
         
         if 'Error 404' in soup.text:
@@ -229,10 +234,18 @@ if __name__ == "__main__":
     
     if actn == 'gt_nws':
         
-        # flnm = input('Enter yaml that holds tfidf scores:  ')
+        flnm = input('Enter yaml that holds tfidf scores:  ')
         
-        # with open(flnm) as f:
-            # tfidf_dct_new = yaml.load(f, yaml.SafeLoader)
+        with open(flnm) as f:
+            tfidf_dct_new = yaml.load(f, yaml.SafeLoader)
+          
+        pth = input('Enter path to store buzz-word counts:  ')    
+         
+        tfidf_tpl = [(tkn, tfidf_dct_new[tkn]['df'],tfidf_dct_new[tkn]['tfidf']) for tkn in tfidf_dct_new]
+        tfidf_tpl.sort(key=lambda x: x[2])
+        mx_docs = max([tfidf_dct_new[i]['df'] for i in tfidf_dct_new])
+        #get top 30 percent where token shows up in more than half the documents 
+        top_wrds = [tpl[0] for tpl in tfidf_tpl if tpl[1] >= mx_docs/2][-int(0.3*len(tfidf_tpl)):]
         
         tot_nws_url_lst = gt_nws_urls()
         
@@ -251,11 +264,13 @@ if __name__ == "__main__":
                   'memory loss', 'hearing loss', 'nausea'
                   ]
         
+        # bzz_wrds += top_wrds
+        
         for data_dct in txt_lst_dct:
             cnt = 0
             tknz_cls = Tokenize(data_dct['text'])
             #first sweep, remove \n in text
-            tknz_cls.rmv_pnc(pnc_lst=['\n'], rplc=' ')
+            tknz_cls.rmv_pnc(pnc_lst=['\n', '\t', '\r'], rplc=' ')
             #second sweep, look for all punctuation
             tknz_cls.rmv_pnc(rplc=' ')
             #split up string by spaces
@@ -268,15 +283,23 @@ if __name__ == "__main__":
             tknz_cls.lwr()
             #remove numbers
             tknz_cls.rmv_nmbrs()
+            #remove those blanks in list of text
+            tknz_cls.rmv_gnrl('')
             #put it back
             tknz_cls.cnctnt()
+            data_dct['word_count'] = tknz_cls.wrd_cnt()
+            data_dct['text'] = tknz_cls.txt
             for bzz in bzz_wrds:
                 if bzz in tknz_cls.txt:
                     cnt += 1
             data_dct['bzz_tkn_num'] = cnt
             
             print(data_dct['url'], data_dct['bzz_tkn_num'])
-            
+        
+        flnm = os.path.join(pth, "bzzwrd_cnt.yaml")
+        print(f'Saving results here: {flnm}')
+        with open(flnm, 'w+') as f:
+            yaml.dump(txt_lst_dct, f, allow_unicode=True)
         
     
     if actn == 'tfidf_ggl_srch':

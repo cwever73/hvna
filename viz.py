@@ -6,7 +6,7 @@ Created on Sun Dec  4 18:24:36 2022
 @author: carl
 """
 
-from bokeh.models import ColumnDataSource, HoverTool,  LinearColorMapper, ToolbarPanel
+from bokeh.models import ColumnDataSource, HoverTool, LinearColorMapper
 from bokeh.palettes import viridis
 from bokeh.plotting import figure, output_file, show
 from bokeh.transform import transform
