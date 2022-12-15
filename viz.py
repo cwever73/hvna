@@ -3,6 +3,8 @@
 """
 Created on Sun Dec  4 18:24:36 2022
 
+Script creates a scatter plot of tfidf vs df values in bokeh.
+
 @author: carl
 """
 
@@ -29,7 +31,6 @@ def scttr_plt(x_lst, y_lst, desc_lst, title):
     p = figure(width=400, height=400, tools=[hover,"box_zoom,pan,box_select,reset"], title=title, toolbar_location="below")
     p.circle('x', 'y', size=10, source=source,
              fill_color=transform('y', mapper))
-    
     
     show(p)
     

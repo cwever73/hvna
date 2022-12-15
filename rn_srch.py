@@ -3,6 +3,8 @@
 """
 Created on Tue Dec 13 20:09:31 2022
 
+Script runs gt_nws from gt_txt.py script every 24hrs
+
 @author: carl
 """
 
@@ -21,9 +23,10 @@ if __name__ == '__main__':
                              run this script:\t'''))
     
     while rn_scrpt != 0:
+        t0 = time.time()
         subprocess.run(['python gt_txt.py gt_nws'], shell=True)
+        t1 = time.time()
         #wait 24hrs
-        time.sleep(86400)
+        #and subtract time it took to run script to avoid creep to next day
+        time.sleep(86400-(t1-t0))
         rn_scrpt -= 1
-    
-    

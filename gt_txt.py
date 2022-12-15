@@ -3,7 +3,8 @@
 """
 Created on Sat Dec  3 14:06:11 2022
 
-Script gets text from desired urls.
+Script gets text from desired urls, creates buzz word yamls, 
+and generate a csv report
 
 @author: carl
 """
@@ -16,6 +17,32 @@ import sys
 import time
 from txt_anlyss import Tokenize, TFIDF
 import yaml
+
+def crt_rprt(fldr):
+    '''Given a folder path, create csv with report of top urls, counts, 
+       and tokens'''
+    
+    tot_data = {}
+    for fl in os.listdir(fldr):
+        if os.path.splitext(fl)[-1] == '.yaml':
+            with open(os.path.join(fldr,fl)) as f:
+                tmp_dct = yaml.load(f, yaml.SafeLoader)
+            
+            for url, val in tmp_dct.items():
+                for cnt, lst in val.items():
+                    #if 5 or more buzz words showed up in article
+                    if cnt >= 5:
+                        tot_data[url] = val
+    
+    date = dt.now().strftime('%Y-%m-%d-%H%M%S')
+    rprt_flnm = os.path.join(fldr, f"top_articles_{date}.csv")
+    with open(rprt_flnm, 'w') as g:
+        g.write('url,count,tokens')
+        for artcl in tot_data:
+            for cnt in tot_data[artcl]:
+                g.write(','.join([artcl,str(cnt),';'.join(tot_data[artcl][cnt])]))
+                
+    return None
 
 
 def gt_ggl_urls(srch_trm):
@@ -145,8 +172,9 @@ def gt_nws_bzz_cnt(pth, bzz_wrds):
     print(f'Number of URLs Scraped: {len(txt_lst_dct)}')
     
     
-    for data_dct in txt_lst_dct[:2]:
+    for data_dct in txt_lst_dct:
         cnt = 0
+        bzz_lst = []
         tknz_cls = Tokenize(data_dct['text'])
         #first sweep, remove \n in text
         tknz_cls.rmv_pnc(pnc_lst=['\n', '\t', '\r'], rplc=' ')
@@ -172,8 +200,10 @@ def gt_nws_bzz_cnt(pth, bzz_wrds):
         for bzz in bzz_wrds:
             if bzz in tknz_cls.txt:
                 cnt += 1
+                bzz_lst.append(bzz)
         
         data_dct['bzz_tkn_num'] = cnt
+        data_dct['bzzwrd_lst'] = bzz_lst
         
         print(data_dct['url'], data_dct['bzz_tkn_num'])
     
@@ -181,7 +211,7 @@ def gt_nws_bzz_cnt(pth, bzz_wrds):
     for data_dct in txt_lst_dct:
         if data_dct['bzz_tkn_num'] > 0:
             psh_dct.setdefault(data_dct['url'], {})
-            psh_dct[data_dct['url']] = data_dct['bzz_tkn_num']
+            psh_dct[data_dct['url']][data_dct['bzz_tkn_num']] = data_dct['bzzwrd_lst']
             
     
     date = dt.now().strftime('%Y-%m-%d-%H%M%S')
@@ -198,7 +228,7 @@ def gt_txt(url_lst):
     
     url_txt = []
     
-    for url in url_lst[:2]:
+    for url in url_lst:
         
         try:
             reqs = requests.get(url)
@@ -288,7 +318,14 @@ if __name__ == "__main__":
     
     actn = sys.argv[1]
     
-    if actn == 'gt_top_tkns':
+    if actn == 'crt_rprt':
+        
+        fldr_nm = input('Enter folder path that holds buzz word yamls:  ')
+        print('Creating Report in same directory as stored yamls ...')
+        crt_rprt(fldr_nm)
+        
+    
+    elif actn == 'gt_top_tkns':
         
         flnm = input('Enter yaml that holds tfidf scores:  ')
         
@@ -301,7 +338,7 @@ if __name__ == "__main__":
         #get top 30 percent where token shows up in more than half the documents 
         top_wrds = [tpl[0] for tpl in tfidf_tpl if tpl[1] >= mx_docs/2][-int(0.3*len(tfidf_tpl)):]
         
-    if actn == 'gt_nws':
+    elif actn == 'gt_nws':
         
         # pth = input('Enter path to store buzz-word counts:  ')    
         
@@ -328,7 +365,7 @@ if __name__ == "__main__":
         
         
     
-    if actn == 'tfidf_ggl_srch':
+    elif actn == 'tfidf_ggl_srch':
         
         srch_trm = input('What do you wanna google?  ')
         
