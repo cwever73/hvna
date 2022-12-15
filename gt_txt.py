@@ -135,13 +135,70 @@ def gt_nws_urls():
     return list(set(npr_url_lst+nyt_url_lst+cnn_url_lst+skmfd_url_lst))
 
 
+def gt_nws_bzz_cnt(pth, bzz_wrds):
+    '''Given write out urls with number of buzz tokens in a yaml file'''
+    
+    tot_nws_url_lst = gt_nws_urls()
+    
+    txt_lst_dct = gt_txt(tot_nws_url_lst)
+    
+    print(f'Number of URLs Scraped: {len(txt_lst_dct)}')
+    
+    
+    for data_dct in txt_lst_dct[:2]:
+        cnt = 0
+        tknz_cls = Tokenize(data_dct['text'])
+        #first sweep, remove \n in text
+        tknz_cls.rmv_pnc(pnc_lst=['\n', '\t', '\r'], rplc=' ')
+        #second sweep, look for all punctuation
+        tknz_cls.rmv_pnc(rplc=' ')
+        #split up string by spaces
+        tknz_cls.tknz()
+        #remove white space
+        tknz_cls.rmv_whtsp()
+        #now remove typical English stopwords
+        tknz_cls.rmv_stpwrds()
+        #put list of strings back together
+        tknz_cls.lwr()
+        #remove numbers
+        tknz_cls.rmv_nmbrs()
+        #remove those blanks in list of text
+        tknz_cls.rmv_gnrl('')
+        #put it back
+        tknz_cls.cnctnt()
+        
+        data_dct['word_count'] = tknz_cls.wrd_cnt()
+
+        for bzz in bzz_wrds:
+            if bzz in tknz_cls.txt:
+                cnt += 1
+        
+        data_dct['bzz_tkn_num'] = cnt
+        
+        print(data_dct['url'], data_dct['bzz_tkn_num'])
+    
+    psh_dct = {}
+    for data_dct in txt_lst_dct:
+        if data_dct['bzz_tkn_num'] > 0:
+            psh_dct.setdefault(data_dct['url'], {})
+            psh_dct[data_dct['url']] = data_dct['bzz_tkn_num']
+            
+    
+    date = dt.now().strftime('%Y-%m-%d-%H%M%S')
+    flnm = os.path.join(pth, f"bzzwrd_cnt_{date}.yaml")
+    print(f'Saving results here: {flnm}')
+    with open(flnm, 'w+') as f:
+        yaml.dump(psh_dct, f, allow_unicode=True)
+    
+
+
 def gt_txt(url_lst):
     '''Given a list of urls, return a list of dictionaries
      containin url and respective text from each'''
     
     url_txt = []
     
-    for url in url_lst:
+    for url in url_lst[:2]:
         
         try:
             reqs = requests.get(url)
@@ -231,75 +288,44 @@ if __name__ == "__main__":
     
     actn = sys.argv[1]
     
-    
-    if actn == 'gt_nws':
+    if actn == 'gt_top_tkns':
         
         flnm = input('Enter yaml that holds tfidf scores:  ')
         
         with open(flnm) as f:
             tfidf_dct_new = yaml.load(f, yaml.SafeLoader)
           
-        pth = input('Enter path to store buzz-word counts:  ')    
-         
         tfidf_tpl = [(tkn, tfidf_dct_new[tkn]['df'],tfidf_dct_new[tkn]['tfidf']) for tkn in tfidf_dct_new]
         tfidf_tpl.sort(key=lambda x: x[2])
         mx_docs = max([tfidf_dct_new[i]['df'] for i in tfidf_dct_new])
         #get top 30 percent where token shows up in more than half the documents 
         top_wrds = [tpl[0] for tpl in tfidf_tpl if tpl[1] >= mx_docs/2][-int(0.3*len(tfidf_tpl)):]
         
-        tot_nws_url_lst = gt_nws_urls()
+    if actn == 'gt_nws':
         
-        txt_lst_dct = gt_txt(tot_nws_url_lst)
+        # pth = input('Enter path to store buzz-word counts:  ')    
         
-        print(f'Number of URLs Scraped: {len(txt_lst_dct)}')
+        pth = '../'
         
         bzz_wrds = ['neuroscience', 'cuba', 'ring', 'ringing', 'illness', 
-                  'mysterious', 'loud noise', 'ear', 'ears', 'pressure',
-                  'vibrations', 'head', 'concussion', 'tinnitus', 'vertigo',
+                  'mysterious', 'loud noise', 'ear', 'pressure', 'dizzy'
+                  'vibration', 'head', 'concussion', 'tinnitus', 'vertigo',
                   'nausea', 'cognitive difficulties', 'cognitive', 'embassy'
-                  'embassies', 'agent', 'agents', 'ambassador', 'ambassadors',
-                  'sonic', 'attack', 'diplomat', 'diplomats', 'noise', 'noises'
-                  'grating noises', 'grating', 'strange', 'home', 'hotel', 
-                  'hotels', 'hotel room',  'hotel rooms', 'device', 'beam',
-                  'memory loss', 'hearing loss', 'nausea'
-                  ]
+                  'embassies', 'agent', 'ambassador', 'dizziness', 'military'
+                  'sonic', 'attack', 'diplomat', 'noise', 'sensation'
+                  'grating noises', 'grating', 'strange', 'home', 
+                  'hotels', 'hotel room', 'device', 'beam', 'electromagnetic'
+                  'memory loss', 'hearing loss', 'headaches', 'devices' ,
+                  'neuological', 'pain', 'signal', 'pulse', 'targeted',
+                  'acute', 'audio', 'auditory', 'symptoms', 'energy', 
+                  'foregin service', 'microwave', 'psychosomatic', 'pulsed',
+                  'intelligence community', 'cia officer', 'assassination',
+                  'fbi', 'debilitating', 'havana', 'syndrome', 'weapon', 
+                  'sudden', 'unexplained', 'brain', 'injury', 'injuries',
+                  'vestibular', 'intelligene agency', 'memory', 'walter reed']
         
-        # bzz_wrds += top_wrds
+        gt_nws_bzz_cnt(pth, bzz_wrds)
         
-        for data_dct in txt_lst_dct:
-            cnt = 0
-            tknz_cls = Tokenize(data_dct['text'])
-            #first sweep, remove \n in text
-            tknz_cls.rmv_pnc(pnc_lst=['\n', '\t', '\r'], rplc=' ')
-            #second sweep, look for all punctuation
-            tknz_cls.rmv_pnc(rplc=' ')
-            #split up string by spaces
-            tknz_cls.tknz()
-            #remove white space
-            tknz_cls.rmv_whtsp()
-            #now remove typical English stopwords
-            tknz_cls.rmv_stpwrds()
-            #put list of strings back together
-            tknz_cls.lwr()
-            #remove numbers
-            tknz_cls.rmv_nmbrs()
-            #remove those blanks in list of text
-            tknz_cls.rmv_gnrl('')
-            #put it back
-            tknz_cls.cnctnt()
-            data_dct['word_count'] = tknz_cls.wrd_cnt()
-            data_dct['text'] = tknz_cls.txt
-            for bzz in bzz_wrds:
-                if bzz in tknz_cls.txt:
-                    cnt += 1
-            data_dct['bzz_tkn_num'] = cnt
-            
-            print(data_dct['url'], data_dct['bzz_tkn_num'])
-        
-        flnm = os.path.join(pth, "bzzwrd_cnt.yaml")
-        print(f'Saving results here: {flnm}')
-        with open(flnm, 'w+') as f:
-            yaml.dump(txt_lst_dct, f, allow_unicode=True)
         
     
     if actn == 'tfidf_ggl_srch':
