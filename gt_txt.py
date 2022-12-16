@@ -340,9 +340,9 @@ if __name__ == "__main__":
         
     elif actn == 'gt_nws':
         
-        # pth = input('Enter path to store buzz-word counts:  ')    
+        pth = input('Enter path to store buzz-word counts:  ')    
         
-        pth = '../'
+        # pth = '../'
         
         bzz_wrds = ['neuroscience', 'cuba', 'ring', 'ringing', 'illness', 
                   'mysterious', 'loud noise', 'ear', 'pressure', 'dizzy'
