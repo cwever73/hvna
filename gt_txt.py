@@ -40,7 +40,7 @@ def crt_rprt(fldr):
         g.write('url,count,tokens')
         for artcl in tot_data:
             for cnt in tot_data[artcl]:
-                g.write(','.join([artcl,str(cnt),';'.join(tot_data[artcl][cnt])]))
+                g.write(','.join([artcl,str(cnt),';'.join(tot_data[artcl][cnt])])+'\n')
                 
     return None
 
@@ -359,7 +359,8 @@ if __name__ == "__main__":
                   'intelligence community', 'cia officer', 'assassination',
                   'fbi', 'debilitating', 'havana', 'syndrome', 'weapon', 
                   'sudden', 'unexplained', 'brain', 'injury', 'injuries',
-                  'vestibular', 'intelligene agency', 'memory', 'walter reed']
+                  'vestibular', 'intelligene agency', 'memory', 'walter reed',
+                  'energy emission']
         
         gt_nws_bzz_cnt(pth, bzz_wrds)
         
