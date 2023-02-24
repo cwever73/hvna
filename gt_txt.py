@@ -163,7 +163,7 @@ def gt_nws_urls():
 
 
 def gt_nws_bzz_cnt(pth, bzz_wrds):
-    '''Given write out urls with number of buzz tokens in a yaml file'''
+    '''Given buzz words, write out urls with number of buzz tokens in a yaml file'''
     
     tot_nws_url_lst = gt_nws_urls()
     

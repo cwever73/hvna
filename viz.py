@@ -32,6 +32,10 @@ def scttr_plt(x_lst, y_lst, desc_lst, title):
     p.circle('x', 'y', size=10, source=source,
              fill_color=transform('y', mapper))
     
+    
+    p.xaxis.axis_label = "Document Fequency"
+    p.yaxis.axis_label = "TFIDF Score"
+
     show(p)
     
     
